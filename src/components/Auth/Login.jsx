@@ -1,12 +1,31 @@
 import React, { useState } from 'react';
+import { handleUserLogin } from '../../utils/auth';
+import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
+  const Navigate = useNavigate();
+
   const submitHandler = (e) => {
     e.preventDefault();
-    console.log('form submitted');
+
+    const result = handleUserLogin(email, password);
+
+    if (result.status === 'success') {
+      localStorage.setItem('loggedInUser', JSON.stringify(result));
+
+      if (result.role === 'admin') {
+        Navigate('/admin');
+      } else {
+        Navigate('/employee');
+      }
+    } else {
+      alert(result.message);
+    }
+
+    // optional: clear fields AFTER login attempt
     setEmail('');
     setPassword('');
   };
@@ -27,10 +46,8 @@ const Login = () => {
               name="email"
               value={email}
               type="email"
-              onChange={(e) => {
-                setEmail(e.target.value);
-              }}
               placeholder=" "
+              onChange={(e) => setEmail(e.target.value)}
               className="peer w-full py-3 border-b border-gray-300 focus:border-b-2 focus:border-indigo-600 bg-transparent outline-none text-neutral-800 placeholder-transparent transition duration-200"
               required
             />
@@ -52,9 +69,7 @@ const Login = () => {
               value={password}
               type="password"
               placeholder=" "
-              onChange={(e) => {
-                setPassword(e.target.value);
-              }}
+              onChange={(e) => setPassword(e.target.value)}
               className="peer w-full py-3 border-b border-gray-300 focus:border-b-2 focus:border-indigo-600 bg-transparent outline-none text-neutral-800 placeholder-transparent transition duration-200"
               required
             />
@@ -72,14 +87,35 @@ const Login = () => {
           <div className="pt-6">
             <button
               type="submit"
-              className="w-full py-3 px-4 rounded-full text-lg font-semibold text-white bg-neutral-900 shadow-lg shadow-neutral-900/40 hover:bg-neutral-800 transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-600"
+              className="
+    cursor-pointer
+    active:scale-95
+    transition
+    duration-200
+    ease-in-out
+    hover:bg-neutral-800
+    bg-neutral-900
+    text-white
+    px-4
+    py-2
+    rounded-full
+    w-full
+    text-lg
+    font-semibold
+    shadow-lg
+    shadow-neutral-900/40
+    focus:outline-none
+    focus:ring-2
+    focus:ring-offset-2
+    focus:ring-indigo-600
+  "
             >
               Log In Securely
             </button>
           </div>
         </form>
 
-        {/* Helper Link (Fixed to prevent redirect) */}
+        {/* Forgot Password */}
         <div className="mt-8 text-center">
           <button
             type="button"
