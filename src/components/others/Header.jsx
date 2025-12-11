@@ -1,5 +1,6 @@
 import React from 'react';
-
+import { AuthContext } from '../../context/AuthContext';
+import { useContext } from 'react';
 const Header = () => {
   return (
     <header className="w-full bg-white shadow-lg py-4 px-6 flex items-center justify-between rounded-b-2xl">

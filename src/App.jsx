@@ -7,6 +7,7 @@ import { initializeLocalStorage } from './utils/localStorage';
 import { useState } from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import AppRoutes from './routes/AppRoutes';
+import TestAuth from './components/TestAuth';
 
 const App = () => {
   useEffect(() => {
@@ -16,6 +17,7 @@ const App = () => {
   return (
     <>
       <BrowserRouter>
+        {/* <TestAuth /> */}
         <AppRoutes />
       </BrowserRouter>
 

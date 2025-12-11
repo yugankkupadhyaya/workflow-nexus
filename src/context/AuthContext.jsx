@@ -1,7 +1,33 @@
-import React from 'react';
+import { createContext, useEffect, useState } from 'react';
 
-const AuthContext = ({ children }) => {
-  return <div>{children}</div>;
+export const AuthContext = createContext();
+
+export const AuthProvider = ({ children }) => {
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const savedUser = localStorage.getItem('user');
+    if (savedUser) {
+      setUser(JSON.parse(savedUser));
+    }
+  }, []);
+
+  const login = (userdata) => {
+    setUser(userdata.user);
+    localStorage.setItem('user', JSON.stringify(userdata.user));
+  };
+
+  const logout = () => {
+    setUser(null);
+    localStorage.removeItem('user');
+  };
+
+  const value = {
+    user,
+    login,
+    logout,
+    isLoggedIn: !!user,
+  };
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
-
-export default AuthContext;

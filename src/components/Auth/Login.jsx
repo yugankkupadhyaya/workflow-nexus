@@ -1,19 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { handleUserLogin } from '../../utils/auth';
 import { useNavigate } from 'react-router-dom';
-
+import { AuthContext } from '../../context/AuthContext';
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
   const Navigate = useNavigate();
-
+  const { login } = useContext(AuthContext);
   const submitHandler = (e) => {
     e.preventDefault();
 
     const result = handleUserLogin(email, password);
 
     if (result.status === 'success') {
+      login(result);
       localStorage.setItem('loggedInUser', JSON.stringify(result));
 
       if (result.role === 'admin') {
