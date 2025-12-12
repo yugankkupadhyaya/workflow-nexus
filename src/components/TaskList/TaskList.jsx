@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useContext } from 'react';
+import { TaskContext } from '../../context/TaskContext';
 
 const TaskList = ({ tasks }) => {
-  // Helper: Convert category to priority color + label
+  const { deleteTask, updateStatus } = useContext(TaskContext);
+
   const getPriority = (category) => {
     switch (category) {
       case 'work':
@@ -13,7 +15,6 @@ const TaskList = ({ tasks }) => {
     }
   };
 
-  // Format date
   const formatDate = (dateStr) => {
     const d = new Date(dateStr);
     return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
@@ -32,7 +33,7 @@ const TaskList = ({ tasks }) => {
               key={task.id}
               className="p-4 bg-neutral-50 border border-neutral-200 rounded-xl shadow-sm hover:shadow-md transition"
             >
-              {/* Priority + Date */}
+              {/* Priority + Date + Status Dropdown */}
               <div className="flex items-center justify-between">
                 <span className={`text-sm font-semibold ${priority.color}`}>{priority.label}</span>
 
@@ -43,6 +44,26 @@ const TaskList = ({ tasks }) => {
               <p className="text-sm text-neutral-600 mt-2">
                 {task.title} — {task.description}
               </p>
+
+              {/* Status + Delete */}
+              <div className="flex items-center justify-between mt-3">
+                <select
+                  className="border rounded-md px-2 py-1 text-sm"
+                  value={task.status}
+                  onChange={(e) => updateStatus(task.id, e.target.value)}
+                >
+                  <option value="new">New</option>
+                  <option value="pending">Pending</option>
+                  <option value="completed">Completed</option>
+                </select>
+
+                <button
+                  onClick={() => deleteTask(task.id)}
+                  className="text-red-600 text-sm font-semibold hover:underline"
+                >
+                  Delete
+                </button>
+              </div>
             </li>
           );
         })}

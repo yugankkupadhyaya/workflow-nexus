@@ -1,75 +1,145 @@
-import React from 'react';
+import React, { useState, useContext } from 'react';
+import { TaskContext } from '../../context/TaskContext';
+import { AuthContext } from '../../context/AuthContext';
+import employees from '../../data/employees';
 
 const CreateTask = () => {
+  const { addTask } = useContext(TaskContext);
+  const { user } = useContext(AuthContext);
+
+  const [task, setTask] = useState({
+    title: '',
+    description: '',
+    date: '',
+    assignedTo: '',
+    category: '',
+  });
+
+  const [showModal, setShowModal] = useState(false); // 🔥 For popup modal
+
+  const handleChange = (e) => {
+    setTask({
+      ...task,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    //  Employee auto-assigned to himself
+    const assignedTo = user.role === 'employee' ? user.email.split('@')[0] : task.assignedTo;
+
+    const newTask = {
+      id: Date.now(),
+      ...task,
+      assignedTo,
+      status: 'new',
+      priority: 'medium',
+    };
+
+    addTask(newTask);
+
+    // Reset form
+    setTask({
+      title: '',
+      description: '',
+      date: '',
+      assignedTo: '',
+      category: '',
+    });
+  };
+
   return (
     <div className="bg-white rounded-2xl shadow-xl p-8 max-w-3xl mx-auto">
-      {/* Title */}
-      <h2 className="text-2xl font-semibold text-neutral-900 mb-6">Create Task</h2>
+      <h2 className="text-2xl font-semibold mb-6">Create Task</h2>
 
-      <form className="space-y-6">
-        {/* Task Title */}
-        <div>
-          <label className="text-sm font-medium text-neutral-700">Task Title</label>
-          <input
-            type="text"
-            placeholder="Make a UI design"
-            className="w-full mt-1 px-4 py-3 rounded-xl border border-neutral-300 bg-neutral-50
-            focus:outline-none focus:ring-2 focus:ring-neutral-800 placeholder-neutral-400"
-          />
-        </div>
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <input
+          name="title"
+          value={task.title}
+          onChange={handleChange}
+          placeholder="Title"
+          className="w-full px-4 py-3 border rounded-xl"
+        />
 
-        {/* Description */}
-        <div>
-          <label className="text-sm font-medium text-neutral-700">Description</label>
-          <textarea
-            rows="4"
-            placeholder="Detailed description of the task (max 500 words)"
-            className="w-full mt-1 px-4 py-3 rounded-xl border border-neutral-300 bg-neutral-50
-            focus:outline-none focus:ring-2 focus:ring-neutral-800 placeholder-neutral-400"
-          ></textarea>
-        </div>
+        <textarea
+          name="description"
+          value={task.description}
+          onChange={handleChange}
+          placeholder="Description"
+          rows="4"
+          className="w-full px-4 py-3 border rounded-xl"
+        ></textarea>
 
-        {/* Date */}
-        <div>
-          <label className="text-sm font-medium text-neutral-700">Date</label>
-          <input
-            type="date"
-            className="w-full mt-1 px-4 py-3 rounded-xl border border-neutral-300 bg-neutral-50
-            focus:outline-none focus:ring-2 focus:ring-neutral-800"
-          />
-        </div>
+        <input
+          type="date"
+          name="date"
+          value={task.date}
+          onChange={handleChange}
+          className="w-full px-4 py-3 border rounded-xl"
+        />
 
-        {/* Assign To */}
-        <div>
-          <label className="text-sm font-medium text-neutral-700">Assign To</label>
-          <input
-            type="text"
-            placeholder="Employee name"
-            className="w-full mt-1 px-4 py-3 rounded-xl border border-neutral-300 bg-neutral-50
-            focus:outline-none focus:ring-2 focus:ring-neutral-800 placeholder-neutral-400"
-          />
-        </div>
+        {/*  ADMIN Select Employee Button */}
+        {user.role === 'admin' && (
+          <button
+            type="button"
+            onClick={() => setShowModal(true)}
+            className="w-full px-4 py-3 border rounded-xl bg-neutral-100 text-left"
+          >
+            {task.assignedTo || 'Select Employee'}
+          </button>
+        )}
 
-        {/* Category */}
-        <div>
-          <label className="text-sm font-medium text-neutral-700">Category</label>
-          <input
-            type="text"
-            placeholder="Design, Development, etc."
-            className="w-full mt-1 px-4 py-3 rounded-xl border border-neutral-300 bg-neutral-50
-            focus:outline-none focus:ring-2 focus:ring-neutral-800 placeholder-neutral-400"
-          />
-        </div>
+        <input
+          name="category"
+          value={task.category}
+          onChange={handleChange}
+          placeholder="work / meeting / general"
+          className="w-full px-4 py-3 border rounded-xl"
+        />
 
-        {/* Button */}
         <button
           type="submit"
-          className="w-full py-3 rounded-full bg-neutral-900 text-white text-lg font-semibold
-          hover:bg-neutral-800 transition-all shadow-md shadow-neutral-900/30"
+          className="w-full py-3 rounded-full bg-neutral-900 text-white font-semibold"
         >
           Create Task
         </button>
       </form>
+
+      {/*  POPUP MODAL */}
+      {showModal && user.role === 'admin' && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-2xl w-80 shadow-xl">
+            <h2 className="text-xl font-semibold mb-4">Assign To</h2>
+
+            <div className="space-y-2 max-h-60 overflow-y-auto">
+              {employees.employees.map((emp) => (
+                <button
+                  key={emp.id}
+                  onClick={() => {
+                    setTask({
+                      ...task,
+                      assignedTo: emp.email.split('@')[0],
+                    });
+                    setShowModal(false);
+                  }}
+                  className="w-full text-left px-4 py-2 bg-neutral-100 rounded-lg hover:bg-neutral-200"
+                >
+                  {emp.email}
+                </button>
+              ))}
+            </div>
+
+            <button
+              onClick={() => setShowModal(false)}
+              className="mt-4 w-full py-2 bg-neutral-900 text-white rounded-xl"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
